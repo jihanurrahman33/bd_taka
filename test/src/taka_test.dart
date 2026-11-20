@@ -359,4 +359,70 @@ void main() {
       expect(Taka.fromPaisa(-12550).toString(), '-125.50');
     });
   });
+
+  group('format', () {
+    final amount = Taka.fromPaisa(123456750); // 12,34,567.50
+
+    test('defaults to the symbol with lakh and crore grouping', () {
+      expect(amount.format(), '৳12,34,567.50');
+    });
+
+    test('groups lakh and crore correctly', () {
+      expect(Taka(999).format(), '৳999.00');
+      expect(Taka(1000).format(), '৳1,000.00');
+      expect(Taka(100000).format(), '৳1,00,000.00'); // one lakh
+      expect(Taka(10000000).format(), '৳1,00,00,000.00'); // one crore
+      expect(Taka(123456789).format(), '৳12,34,56,789.00');
+    });
+
+    test('writes Bengali digits', () {
+      expect(amount.format(bengaliDigits: true), '৳১২,৩৪,৫৬৭.৫০');
+    });
+
+    test('supports international and no grouping', () {
+      expect(
+        amount.format(grouping: Grouping.international),
+        '৳1,234,567.50',
+      );
+      expect(amount.format(grouping: Grouping.none), '৳1234567.50');
+    });
+
+    test('can leave out the symbol', () {
+      expect(amount.format(symbol: false), '12,34,567.50');
+    });
+
+    test('always shows two decimals for paisa', () {
+      expect(Taka.zero.format(), '৳0.00');
+      expect(Taka.fromPaisa(5).format(), '৳0.05');
+      expect(Taka.fromPaisa(90).format(), '৳0.90');
+    });
+
+    test('omitZeroPaisa hides decimals only for whole taka', () {
+      expect(Taka(1250).format(omitZeroPaisa: true), '৳1,250');
+      expect(Taka.zero.format(omitZeroPaisa: true), '৳0');
+      expect(Taka.fromPaisa(125050).format(omitZeroPaisa: true), '৳1,250.50');
+      expect(Taka.fromPaisa(5).format(omitZeroPaisa: true), '৳0.05');
+    });
+
+    test('puts the minus sign before the symbol', () {
+      expect(Taka.fromPaisa(-12550).format(), '-৳125.50');
+      expect(Taka.fromPaisa(-5).format(), '-৳0.05');
+      expect(Taka.fromPaisa(-12550).format(symbol: false), '-125.50');
+      expect(
+        Taka.fromPaisa(-12550).format(bengaliDigits: true),
+        '-৳১২৫.৫০',
+      );
+    });
+
+    test('formats the largest and smallest amounts', () {
+      expect(
+        Taka.fromPaisa(Taka.maxPaisa).format(symbol: false),
+        '9,00,71,99,25,47,409.91',
+      );
+      expect(
+        Taka.fromPaisa(-Taka.maxPaisa).format(symbol: false),
+        '-9,00,71,99,25,47,409.91',
+      );
+    });
+  });
 }

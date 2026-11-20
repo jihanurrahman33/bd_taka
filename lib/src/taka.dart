@@ -1,3 +1,5 @@
+import 'digits.dart';
+import 'grouping.dart';
 import 'rounding_mode.dart';
 
 /// An exact amount of Bangladeshi taka (৳), stored as a whole number of paisa.
@@ -209,11 +211,47 @@ final class Taka implements Comparable<Taka> {
   /// The amount as plain decimal text with exactly two decimals, such as
   /// `1250.50` or `-0.05`.
   ///
-  /// This is a stable, machine-readable form, not display text.
+  /// This is a stable, machine-readable form, not display text. Use [format]
+  /// to show an amount to a person.
   @override
   String toString() {
     final sign = isNegative ? '-' : '';
-    final fraction = paisaPart.toString().padLeft(2, '0');
-    return '$sign${paisa.abs() ~/ 100}.$fraction';
+    return '$sign${paisa.abs() ~/ 100}.${_paisaDigits()}';
   }
+
+  /// Formats this amount for display.
+  ///
+  /// By default the result uses the South Asian lakh and crore grouping with a
+  /// leading ৳ sign, as in `৳12,34,567.50`.
+  ///
+  /// - [symbol] adds the ৳ sign before the digits. A negative amount puts the
+  ///   minus sign first, as in `-৳125.50`.
+  /// - [bengaliDigits] writes the digits as `০১২৩৪৫৬৭৮৯`, as in `৳১২,৩৪,৫৬৭.৫০`.
+  /// - [grouping] chooses how digits are separated. See [Grouping].
+  /// - [omitZeroPaisa] leaves out the decimals when the amount is a whole
+  ///   number of taka, as in `৳1,250`. Amounts with paisa always show both
+  ///   decimals, so nothing is hidden.
+  ///
+  /// ```dart
+  /// final amount = Taka.fromPaisa(123456750);
+  /// amount.format(); // ৳12,34,567.50
+  /// amount.format(bengaliDigits: true); // ৳১২,৩৪,৫৬৭.৫০
+  /// amount.format(grouping: Grouping.international); // ৳1,234,567.50
+  /// amount.format(symbol: false); // 12,34,567.50
+  /// ```
+  String format({
+    bool symbol = true,
+    bool bengaliDigits = false,
+    Grouping grouping = Grouping.southAsian,
+    bool omitZeroPaisa = false,
+  }) {
+    final whole = applyGrouping((paisa.abs() ~/ 100).toString(), grouping);
+    final showPaisa = !(omitZeroPaisa && paisaPart == 0);
+    final digits = showPaisa ? '$whole.${_paisaDigits()}' : whole;
+    final text = bengaliDigits ? toBengaliDigits(digits) : digits;
+    return '${isNegative ? '-' : ''}${symbol ? '৳' : ''}$text';
+  }
+
+  /// The paisa as exactly two ASCII digits, `00` to `99`.
+  String _paisaDigits() => paisaPart.toString().padLeft(2, '0');
 }

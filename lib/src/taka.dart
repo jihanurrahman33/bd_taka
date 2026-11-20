@@ -2,6 +2,7 @@ import 'digits.dart';
 import 'grouping.dart';
 import 'parse.dart';
 import 'rounding_mode.dart';
+import 'words_en.dart';
 
 /// An exact amount of Bangladeshi taka (৳), stored as a whole number of paisa.
 ///
@@ -287,6 +288,34 @@ final class Taka implements Comparable<Taka> {
     final text = bengaliDigits ? toBengaliDigits(digits) : digits;
     return '${isNegative ? '-' : ''}${symbol ? '৳' : ''}$text';
   }
+
+  /// Spells this amount in English, as written on a cheque or an invoice.
+  ///
+  /// Numbers use the South Asian scale of thousand, lakh and crore, with
+  /// compounds hyphenated. `Taka` and `Paisa` stay singular, as currency
+  /// names do.
+  ///
+  /// ```dart
+  /// Taka.fromPaisa(12550).toEnglishWords();
+  /// // One Hundred and Twenty-Five Taka and Fifty Paisa Only
+  /// Taka(123456).toEnglishWords();
+  /// // One Lakh Twenty-Three Thousand Four Hundred and Fifty-Six Taka Only
+  /// Taka.fromPaisa(50).toEnglishWords(); // Fifty Paisa Only
+  /// Taka.zero.toEnglishWords(); // Zero Taka Only
+  /// Taka(-5).toEnglishWords(); // Minus Five Taka Only
+  /// ```
+  ///
+  /// - [only] closes the text with `Only`, the cheque convention that stops
+  ///   anyone adding digits afterwards. Pass `false` to leave it out.
+  /// - [useAnd] puts `and` before the last two digits of any number above 100
+  ///   (`One Hundred and Five`), the British and South Asian style. Pass
+  ///   `false` for `One Hundred Five`.
+  ///
+  /// From 100 crore upward the crore count is spelled out the same way, so
+  /// 100 crore is `One Hundred Crore`. Larger Indian-system names such as
+  /// arab and kharab are not used.
+  String toEnglishWords({bool only = true, bool useAnd = true}) =>
+      englishAmount(paisa, only: only, useAnd: useAnd);
 
   /// The paisa as exactly two ASCII digits, `00` to `99`.
   String _paisaDigits() => paisaPart.toString().padLeft(2, '0');

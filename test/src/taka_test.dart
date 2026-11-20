@@ -465,6 +465,37 @@ void main() {
     });
   });
 
+  group('toBanglaWords', () {
+    test('spells taka and পয়সা as on a cheque', () {
+      expect(
+        Taka.fromPaisa(12550).toBanglaWords(),
+        'একশো পঁচিশ টাকা পঞ্চাশ পয়সা মাত্র',
+      );
+      expect(
+        Taka(1234567).toBanglaWords(),
+        'বারো লক্ষ চৌত্রিশ হাজার পাঁচশো সাতষট্টি টাকা মাত্র',
+      );
+    });
+
+    test('handles zero, পয়সা alone and negatives', () {
+      expect(Taka.zero.toBanglaWords(), 'শূন্য টাকা মাত্র');
+      expect(Taka.fromPaisa(50).toBanglaWords(), 'পঞ্চাশ পয়সা মাত্র');
+      expect(Taka(-5).toBanglaWords(), 'ঋণাত্মক পাঁচ টাকা মাত্র');
+    });
+
+    test('supports leaving out মাত্র', () {
+      expect(Taka(100).toBanglaWords(only: false), 'একশো টাকা');
+    });
+
+    test('spells every sample amount without throwing', () {
+      for (final paisa in _samplePaisa) {
+        final words = Taka.fromPaisa(paisa).toBanglaWords();
+        expect(words, endsWith(' মাত্র'));
+        expect(words, isNot(contains('  ')));
+      }
+    });
+  });
+
   group('parse', () {
     test('parses text into an amount', () {
       expect(Taka.parse('1250'), Taka(1250));

@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:bd_taka/bd_taka.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('construction', () {

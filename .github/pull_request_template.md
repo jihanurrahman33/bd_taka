@@ -2,5 +2,5 @@
 
 ## Checklist
 - [ ] Tests added or updated
-- [ ] `dart format`, `dart analyze --fatal-infos`, `dart test -p vm,chrome` pass
+- [ ] `dart format`, `flutter analyze`, `flutter test` and `flutter test --platform chrome` pass
 - [ ] `CHANGELOG.md` updated

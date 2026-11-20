@@ -1,12 +1,23 @@
 name: Publish to pub.dev
 
-# Enable automated publishing on pub.dev (package Admin tab) with tag pattern v{{version}}.
+# Enable automated publishing on pub.dev (package Admin tab) with tag pattern
+# v{{version}}. bd_taka depends on Flutter, so the reusable Dart-only workflow
+# cannot be used: setup-dart provides the OIDC credentials and the Flutter SDK
+# does the publishing.
 on:
   push:
     tags: ["v[0-9]+.[0-9]+.[0-9]+*"]
 
 jobs:
   publish:
+    runs-on: ubuntu-latest
     permissions:
       id-token: write
-    uses: dart-lang/setup-dart/.github/workflows/publish.yml@v1
+    steps:
+      - uses: actions/checkout@v7
+      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter pub publish --force

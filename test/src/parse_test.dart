@@ -1,5 +1,5 @@
 import 'package:bd_taka/src/parse.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('parsePaisa accepts', () {

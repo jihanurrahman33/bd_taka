@@ -13,3 +13,24 @@ String toBengaliDigits(String text) {
   }
   return buffer.toString();
 }
+
+/// Replaces every Bengali digit in [text] with its ASCII digit, leaving all
+/// other characters unchanged.
+///
+/// `fromBengaliDigits('১২,৩৪.৫০')` is `'12,34.50'`.
+String fromBengaliDigits(String text) {
+  final buffer = StringBuffer();
+  for (final unit in text.codeUnits) {
+    final isBengaliDigit = unit >= _bengaliZero && unit <= _bengaliZero + 9;
+    buffer.writeCharCode(isBengaliDigit ? 0x30 + (unit - _bengaliZero) : unit);
+  }
+  return buffer.toString();
+}
+
+/// Whether [text] contains at least one Bengali digit.
+bool hasBengaliDigit(String text) =>
+    text.codeUnits.any((u) => u >= _bengaliZero && u <= _bengaliZero + 9);
+
+/// Whether [text] contains at least one ASCII digit.
+bool hasAsciiDigit(String text) =>
+    text.codeUnits.any((u) => u >= 0x30 && u <= 0x39);

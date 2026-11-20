@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:bd_taka/bd_taka.dart';
 import 'package:test/test.dart';
 
@@ -425,4 +427,103 @@ void main() {
       );
     });
   });
+
+  group('parse', () {
+    test('parses text into an amount', () {
+      expect(Taka.parse('1250'), Taka(1250));
+      expect(Taka.parse('৳12,34,567.5'), Taka.fromPaisa(123456750));
+      expect(Taka.parse('-৳১২৫.৫০'), Taka.fromPaisa(-12550));
+      expect(Taka.parse('1.5'), Taka.fromPaisa(150));
+    });
+
+    test('throws a FormatException for invalid text', () {
+      expect(() => Taka.parse('1.234'), throwsFormatException);
+      expect(() => Taka.parse(''), throwsFormatException);
+      expect(() => Taka.parse('1,25,0'), throwsFormatException);
+      expect(() => Taka.parse('99999999999999999999'), throwsFormatException);
+    });
+
+    test('keeps the source and a reason in the exception', () {
+      try {
+        Taka.parse('1.234');
+        fail('Expected a FormatException.');
+      } on FormatException catch (e) {
+        expect(e.source, '1.234');
+        expect(e.message, contains('at most two decimals'));
+      }
+    });
+
+    test('tryParse returns null instead of throwing', () {
+      expect(Taka.tryParse('1250'), Taka(1250));
+      expect(Taka.tryParse('1.234'), isNull);
+      expect(Taka.tryParse(''), isNull);
+      expect(Taka.tryParse('99999999999999999999'), isNull);
+    });
+
+    test('reads back what toString writes', () {
+      for (final paisa in _samplePaisa) {
+        final amount = Taka.fromPaisa(paisa);
+        expect(Taka.parse(amount.toString()), amount, reason: '$paisa');
+      }
+    });
+
+    test('reads back what format writes, for every option', () {
+      for (final paisa in _samplePaisa) {
+        final amount = Taka.fromPaisa(paisa);
+        for (final symbol in [true, false]) {
+          for (final bengaliDigits in [true, false]) {
+            for (final omitZeroPaisa in [true, false]) {
+              for (final grouping in Grouping.values) {
+                final text = amount.format(
+                  symbol: symbol,
+                  bengaliDigits: bengaliDigits,
+                  grouping: grouping,
+                  omitZeroPaisa: omitZeroPaisa,
+                );
+                expect(
+                  Taka.parse(text),
+                  amount,
+                  reason: '$paisa as "$text" '
+                      '(symbol: $symbol, bengaliDigits: $bengaliDigits, '
+                      'grouping: $grouping, omitZeroPaisa: $omitZeroPaisa)',
+                );
+              }
+            }
+          }
+        }
+      }
+    });
+  });
 }
+
+/// Amounts that exercise every grouping boundary, both signs and the limits,
+/// plus a few hundred pseudo-random values from a fixed seed.
+final List<int> _samplePaisa = () {
+  final random = Random(42);
+  return [
+    0,
+    1,
+    5,
+    50,
+    99,
+    100,
+    101,
+    99999,
+    100000,
+    12345,
+    10000000,
+    123456750,
+    1000000000,
+    Taka.maxPaisa,
+    -1,
+    -5,
+    -12550,
+    -123456750,
+    -Taka.maxPaisa,
+    // The product stays below 2^53, so it is exact under dart2js too.
+    for (var i = 0; i < 300; i++)
+      (random.nextBool() ? 1 : -1) *
+          random.nextInt(0x7fffffff) *
+          random.nextInt(4000000),
+  ];
+}();

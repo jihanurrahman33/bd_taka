@@ -17,4 +17,34 @@ void main() {
       expect(toBengaliDigits(''), '');
     });
   });
+
+  group('fromBengaliDigits', () {
+    test('converts every digit', () {
+      expect(fromBengaliDigits('০১২৩৪৫৬৭৮৯'), '0123456789');
+    });
+
+    test('leaves separators and other characters alone', () {
+      expect(fromBengaliDigits('১২,৩৪,৫৬৭.৫০'), '12,34,567.50');
+      expect(fromBengaliDigits('-৳ ৫ Tk'), '-৳ 5 Tk');
+    });
+
+    test('is the inverse of toBengaliDigits', () {
+      const text = '-12,34,567.50 and 0987';
+      expect(fromBengaliDigits(toBengaliDigits(text)), text);
+    });
+  });
+
+  group('digit detection', () {
+    test('finds Bengali digits', () {
+      expect(hasBengaliDigit('৳১২'), isTrue);
+      expect(hasBengaliDigit('12'), isFalse);
+      expect(hasBengaliDigit(''), isFalse);
+    });
+
+    test('finds ASCII digits', () {
+      expect(hasAsciiDigit('৳12'), isTrue);
+      expect(hasAsciiDigit('১২'), isFalse);
+      expect(hasAsciiDigit(''), isFalse);
+    });
+  });
 }

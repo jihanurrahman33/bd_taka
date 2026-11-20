@@ -22,7 +22,8 @@ jobs:
       - run: dart pub get
       - run: dart format --set-exit-if-changed .
       - run: dart analyze --fatal-infos
-      - run: dart test
+      # The VM and dart2js have different integer semantics, so run both.
+      - run: dart test -p vm,chrome
 
   publish-dry-run:
     runs-on: ubuntu-latest

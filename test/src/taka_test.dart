@@ -428,6 +428,43 @@ void main() {
     });
   });
 
+  group('toEnglishWords', () {
+    test('spells taka and paisa as on a cheque', () {
+      expect(
+        Taka.fromPaisa(12550).toEnglishWords(),
+        'One Hundred and Twenty-Five Taka and Fifty Paisa Only',
+      );
+      expect(
+        Taka(123456).toEnglishWords(),
+        'One Lakh Twenty-Three Thousand Four Hundred and Fifty-Six Taka Only',
+      );
+    });
+
+    test('handles zero, paisa alone and negatives', () {
+      expect(Taka.zero.toEnglishWords(), 'Zero Taka Only');
+      expect(Taka.fromPaisa(50).toEnglishWords(), 'Fifty Paisa Only');
+      expect(Taka(-5).toEnglishWords(), 'Minus Five Taka Only');
+    });
+
+    test('supports leaving out Only and and', () {
+      final amount = Taka.fromPaisa(10500);
+      expect(amount.toEnglishWords(), 'One Hundred and Five Taka Only');
+      expect(amount.toEnglishWords(only: false), 'One Hundred and Five Taka');
+      expect(
+        amount.toEnglishWords(useAnd: false),
+        'One Hundred Five Taka Only',
+      );
+    });
+
+    test('spells every sample amount without throwing', () {
+      for (final paisa in _samplePaisa) {
+        final words = Taka.fromPaisa(paisa).toEnglishWords();
+        expect(words, endsWith(' Only'));
+        expect(words, isNot(contains('  ')));
+      }
+    });
+  });
+
   group('parse', () {
     test('parses text into an amount', () {
       expect(Taka.parse('1250'), Taka(1250));

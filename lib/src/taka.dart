@@ -2,6 +2,7 @@ import 'digits.dart';
 import 'grouping.dart';
 import 'parse.dart';
 import 'rounding_mode.dart';
+import 'words_bn.dart';
 import 'words_en.dart';
 
 /// An exact amount of Bangladeshi taka (৳), stored as a whole number of paisa.
@@ -316,6 +317,29 @@ final class Taka implements Comparable<Taka> {
   /// arab and kharab are not used.
   String toEnglishWords({bool only = true, bool useAnd = true}) =>
       englishAmount(paisa, only: only, useAnd: useAnd);
+
+  /// Spells this amount in Bangla, as written on a cheque or an invoice.
+  ///
+  /// Numbers use the South Asian scale of হাজার (thousand), লক্ষ (lakh) and
+  /// কোটি (crore). Hundreds are written with শো (`পাঁচশো`), and every number
+  /// below 100 uses its own word, such as সাঁইত্রিশ for 37.
+  ///
+  /// ```dart
+  /// Taka.fromPaisa(12550).toBanglaWords();
+  /// // একশো পঁচিশ টাকা পঞ্চাশ পয়সা মাত্র
+  /// Taka(1234567).toBanglaWords();
+  /// // বারো লক্ষ চৌত্রিশ হাজার পাঁচশো সাতষট্টি টাকা মাত্র
+  /// Taka.fromPaisa(50).toBanglaWords(); // পঞ্চাশ পয়সা মাত্র
+  /// Taka.zero.toBanglaWords(); // শূন্য টাকা মাত্র
+  /// Taka(-5).toBanglaWords(); // ঋণাত্মক পাঁচ টাকা মাত্র
+  /// ```
+  ///
+  /// [only] closes the text with মাত্র, the cheque convention that stops anyone
+  /// adding digits afterwards. Pass `false` to leave it out.
+  ///
+  /// From 100 crore upward the crore count is spelled out the same way, so
+  /// 100 crore is `একশো কোটি`.
+  String toBanglaWords({bool only = true}) => banglaAmount(paisa, only: only);
 
   /// The paisa as exactly two ASCII digits, `00` to `99`.
   String _paisaDigits() => paisaPart.toString().padLeft(2, '0');

@@ -10,25 +10,34 @@ permissions:
 
 jobs:
   test:
+    name: test (flutter ${{ matrix.flutter-version || 'stable' }})
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        sdk: [stable, "3.0.0"]
+        include:
+          # The lowest Flutter release with Dart 3.0, the package's floor.
+          - flutter-version: "3.10.0"
+          # An empty version means the latest stable release.
+          - flutter-version: ""
     steps:
       - uses: actions/checkout@v7
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v2
         with:
-          sdk: ${{ matrix.sdk }}
-      - run: dart pub get
-      - run: dart format --set-exit-if-changed .
-      - run: dart analyze --fatal-infos
+          flutter-version: ${{ matrix.flutter-version }}
+          channel: stable
+      - run: flutter pub get
+      - run: dart format --set-exit-if-changed lib test example
+      - run: flutter analyze
       # The VM and dart2js have different integer semantics, so run both.
-      - run: dart test -p vm,chrome
+      - run: flutter test
+      - run: flutter test --platform chrome
 
   publish-dry-run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: dart-lang/setup-dart@v1
-      - run: dart pub get
-      - run: dart pub publish --dry-run
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter pub publish --dry-run

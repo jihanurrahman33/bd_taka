@@ -4,9 +4,10 @@
 2. Write a failing test first, then the fix or feature.
 3. Run before pushing:
    ```bash
-   dart format .
-   dart analyze --fatal-infos
-   dart test -p vm,chrome
+   dart format lib test example
+   flutter analyze
+   flutter test
+   flutter test --platform chrome
    ```
    The web run matters: `int` behaves differently under dart2js, and this
    package promises exact amounts there too.

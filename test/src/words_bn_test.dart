@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:bd_taka/src/words_bn.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 /// The table approved for 0 to 99, in the same grid it was reviewed in: rows
 /// are the tens, columns are the ones. It is typed out here on purpose, so an

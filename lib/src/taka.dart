@@ -1,5 +1,6 @@
 import 'digits.dart';
 import 'grouping.dart';
+import 'parse.dart';
 import 'rounding_mode.dart';
 
 /// An exact amount of Bangladeshi taka (৳), stored as a whole number of paisa.
@@ -44,6 +45,41 @@ final class Taka implements Comparable<Taka> {
   factory Taka.fromPaisa(int paisa) {
     RangeError.checkValueInInterval(paisa, -maxPaisa, maxPaisa, 'paisa');
     return Taka._(paisa);
+  }
+
+  /// Parses [source] strictly into an amount.
+  ///
+  /// Accepts what [format] and [toString] produce, and more: an optional
+  /// leading `-`, an optional marker (`৳`, `Tk`, `Tk.` or `BDT`, ignoring case),
+  /// then ASCII or Bengali digits (not both) with no grouping, South Asian
+  /// grouping (`12,34,567`) or international grouping (`1,234,567`), and an
+  /// optional fraction of one or two digits. A single fraction digit counts as
+  /// tenths of a taka, so `1.5` is `1.50`.
+  ///
+  /// ```dart
+  /// Taka.parse('1250');         // 1250.00
+  /// Taka.parse('৳12,34,567.5'); // 1234567.50
+  /// Taka.parse('-৳১২৫.৫০');     // -125.50
+  /// ```
+  ///
+  /// Anything else is rejected rather than guessed: more than two decimals
+  /// (which would lose paisa), misplaced commas, leading zeros, exponents,
+  /// surrounding text, an empty string, and amounts outside the range of
+  /// [Taka]. Use [tryParse] to get `null` instead of an exception.
+  ///
+  /// Throws a [FormatException] if [source] is not a valid amount.
+  factory Taka.parse(String source) {
+    final result = parsePaisa(source);
+    final paisa = result.paisa;
+    if (paisa == null) throw FormatException(result.error!, source);
+    return Taka._(paisa);
+  }
+
+  /// Parses [source] like [Taka.parse], returning `null` instead of throwing
+  /// when it is not a valid amount.
+  static Taka? tryParse(String source) {
+    final paisa = parsePaisa(source).paisa;
+    return paisa == null ? null : Taka._(paisa);
   }
 
   static final BigInt _hundred = BigInt.from(100);
@@ -211,8 +247,8 @@ final class Taka implements Comparable<Taka> {
   /// The amount as plain decimal text with exactly two decimals, such as
   /// `1250.50` or `-0.05`.
   ///
-  /// This is a stable, machine-readable form, not display text. Use [format]
-  /// to show an amount to a person.
+  /// This is a stable, machine-readable form that [Taka.parse] reads back, not
+  /// display text. Use [format] to show an amount to a person.
   @override
   String toString() {
     final sign = isNegative ? '-' : '';

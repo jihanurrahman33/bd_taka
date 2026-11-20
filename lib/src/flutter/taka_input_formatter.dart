@@ -24,7 +24,8 @@ import '../taka.dart';
 ///
 /// The formatter does not add the ৳ symbol to the text; use
 /// `InputDecoration.prefixText` for that, so the symbol cannot be deleted or
-/// end up in the value. `TakaFormField` sets this up for you.
+/// end up in the value. `TakaEditingController` offers a matching formatter
+/// and reads the field as a [Taka].
 class TakaInputFormatter extends TextInputFormatter {
   /// Creates a taka input formatter.
   ///

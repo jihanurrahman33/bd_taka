@@ -1,0 +1,18 @@
+name: bd_taka
+description: Money-safe Bangladeshi taka for Dart. An exact integer-paisa Taka type with arithmetic, fair splitting, lakh/crore formatting, strict parsing and amount in words (English and Bangla). Pure Dart, zero dependencies.
+version: 0.0.1
+homepage: https://github.com/jihanurrahman33/bd_taka
+repository: https://github.com/jihanurrahman33/bd_taka
+issue_tracker: https://github.com/jihanurrahman33/bd_taka/issues
+topics:
+  - bangladesh
+  - taka
+  - money
+  - currency
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dev_dependencies:
+  lints: ">=3.0.0 <7.0.0"
+  test: ">=1.24.0 <2.0.0"

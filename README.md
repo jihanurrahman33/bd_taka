@@ -4,10 +4,14 @@
 [![CI](https://github.com/jihanurrahman33/bd_taka/actions/workflows/ci.yml/badge.svg)](https://github.com/jihanurrahman33/bd_taka/actions/workflows/ci.yml)
 [![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Money-safe Bangladeshi taka for Dart. An exact integer-paisa `Taka` type with
+Money-safe Bangladeshi taka for Flutter. An exact integer-paisa `Taka` type with
 arithmetic, fair splitting, lakh/crore formatting, strict parsing and amount in
-words, in English and Bangla. Pure Dart, zero dependencies, works in Flutter,
-server, CLI and the web.
+words, in English and Bangla, plus a cursor-safe input formatter for text
+fields. Works on Android, iOS, the web, Windows, macOS and Linux.
+
+> **Using pure Dart (a server or CLI, no Flutter)?** Since 0.2.0 this package
+> depends on Flutter. Stay on `bd_taka: ^0.1.0`, which has the same money API
+> without the text-field support.
 
 ## Why
 
@@ -28,13 +32,13 @@ ways never gains or loses a paisa.
 - 🔢 Lakh and crore grouping (`12,34,567.50`), optional ৳ and Bengali digits
 - 🧾 Strict `parse` and `tryParse` that accept what `format` writes, in either digit system
 - ✍️ Amount in words for cheques and invoices: English and Bangla
+- ⌨️ `TakaInputFormatter` and `TakaEditingController` for any text field: lakh/crore as you type, Bengali digits, a cursor that never jumps
 - 🌐 Exact on the web too: amounts are limited to ±(2⁵³ − 1) paisa, about ৳90 trillion
 
 ## Install
 
-```yaml
-dependencies:
-  bd_taka: ^0.1.0
+```sh
+flutter pub add bd_taka
 ```
 
 ## Usage
@@ -136,15 +140,52 @@ Some Bangla numbers have more than one accepted spelling. This package uses
 39 … 89, and hundreds written with শো. If your house style differs, or you
 spot a mistake, please open an issue.
 
+### Text fields
+
+`TakaEditingController` reads and writes a field as a `Taka`, and its
+`formatter` groups the text as the person types:
+
+```dart
+final controller = TakaEditingController(taka: Taka(1250));
+
+TextField(
+  controller: controller,
+  inputFormatters: [controller.formatter],
+  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+  decoration: const InputDecoration(prefixText: '৳ '),
+);
+
+controller.taka;                          // Taka(1250), or null while empty
+controller.taka = Taka.fromPaisa(99950);  // shows 999.50
+```
+
+While typing, `1234567.5` becomes `12,34,567.5` and the cursor stays after the
+digit it followed, so editing in the middle of a number works. Digits typed in
+Bengali are accepted, and `bengaliDigits: true` shows them in Bengali too.
+Edits that would make the text invalid, such as a second decimal point, a third
+decimal digit or an amount out of range, are ignored. Backspace over a comma
+deletes the digit before it, and text still being composed by a phonetic
+keyboard is left alone.
+
+The ৳ symbol belongs in the decoration's `prefixText`, so it is never part of
+the text or the value. Already have a controller? Add
+`const TakaInputFormatter()` to any field's `inputFormatters` and read the
+amount with `TakaInputFormatter.tryParse(text)`.
+
+Both work with Material, Cupertino or any other text field; the package does
+not depend on Material.
+
 ## Related packages
 
 Other packages cover parts of this on pub.dev, for example
 [`bangla_format`](https://pub.dev/packages/bangla_format) (Bangla digits, dates
-and taka formatting) and
+and taka formatting),
+[`bd_money_formatter`](https://pub.dev/packages/bd_money_formatter) (lakh/crore
+number formatting) and
 [`bangla_number_to_words`](https://pub.dev/packages/bangla_number_to_words)
 (numbers and currency in Bangla words). `bd_taka` is aimed at the money itself:
-an exact value type, safe splitting and rounding, lakh/crore formatting and
-strict parsing. It takes a whole number of paisa, not a `double`.
+an exact value type, safe splitting and rounding, lakh/crore formatting, strict
+parsing and input. It takes a whole number of paisa, not a `double`.
 
 ## Contributing
 

@@ -1,6 +1,6 @@
 name: bd_taka
-description: "Exact Bangladeshi taka for Dart: integer-paisa money, fair splitting, lakh/crore formatting, strict parsing and amount in words (English and Bangla). Zero dependencies."
-version: 0.1.0
+description: "Exact Bangladeshi taka for Flutter: integer-paisa money, fair splitting, lakh/crore formatting, strict parsing, amount in words and a cursor-safe input formatter."
+version: 0.2.0
 homepage: https://github.com/jihanurrahman33/bd_taka
 repository: https://github.com/jihanurrahman33/bd_taka
 issue_tracker: https://github.com/jihanurrahman33/bd_taka/issues
@@ -9,6 +9,7 @@ topics:
   - taka
   - money
   - currency
+  - input-formatter
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
